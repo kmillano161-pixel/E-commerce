@@ -57,7 +57,7 @@ export default function CartDrawer() {
 
       {/* overlay */}
       {open ? (
-        <div className="fixed inset-0 z-50  ">
+        <div className="fixed inset-0 z-50">
           <div className="absolute inset-0 bg-slate-900/40" onClick={handleClose} />
 
           <aside

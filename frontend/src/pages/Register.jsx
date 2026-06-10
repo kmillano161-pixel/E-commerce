@@ -55,14 +55,21 @@ export default function Register() {
 
   return (
     <div className="bb-page">
-      <div className="bb-container bb-section" style={{ paddingTop: 40, paddingBottom: 40 }}>
-        <div className="mb-8">
-          <h1 className="bb-title">Register</h1>
-          <p className="bb-subtitle text-sm">Create an account (stored locally in your browser).</p>
-        </div>
+      <div
+        className="bb-container bb-section"
+        style={{
+          paddingTop: 40,
+          paddingBottom: 40,
+        }}
+      >
+        <div className="min-h-[calc(100svh-80px)] flex flex-col items-center justify-center text-center">
+          <div className="mb-8 w-full max-w-md">
+            <h1 className="bb-title">Register</h1>
+            <p className="bb-subtitle text-sm">Create an account (stored locally in your browser).</p>
+          </div>
 
-        <div className="max-w-md">
-          <Card className="p-6">
+          <div className="w-full max-w-md">
+            <Card className="p-6">
             {error ? (
               <div className="mb-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
                 {error}
@@ -117,6 +124,7 @@ export default function Register() {
               </div>
             </form>
           </Card>
+          </div>
         </div>
       </div>
     </div>
