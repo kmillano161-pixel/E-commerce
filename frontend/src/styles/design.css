@@ -106,6 +106,12 @@
 
 /* Buttons */
 .bb-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 40px;
+
   background: #2563eb;
   color: #fff;
   border-radius: 12px;

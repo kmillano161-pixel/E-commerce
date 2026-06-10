@@ -1,4 +1,4 @@
-import { useMemo, useState, useContext } from 'react'
+import { useMemo, useState, useContext, useEffect } from 'react'
 import { AuthContext } from '../store/AuthProvider'
 import { useNavigate } from 'react-router-dom'
 
@@ -55,7 +55,25 @@ export default function Shop({ products: apiProducts }) {
   })
 
 
-  const [query, setQuery] = useState('')
+  const [query, setQuery] = useState(() => {
+    try {
+      return window.sessionStorage.getItem('shopQuery') || ''
+    } catch {
+      return ''
+    }
+  })
+
+  useEffect(() => {
+    // clear after first load so it doesn't keep forcing search when navigating back
+    try {
+      window.sessionStorage.removeItem('shopQuery')
+    } catch {
+      // ignore
+    }
+  }, [])
+
+  const q = query.trim().toLowerCase()
+
   const [sort, setSort] = useState('featured')
 
   const products = useMemo(() => {
@@ -67,8 +85,7 @@ export default function Shop({ products: apiProducts }) {
     }
 
 
-    if (query.trim()) {
-      const q = query.trim().toLowerCase()
+    if (q) {
       list = list.filter((p) => p.name.toLowerCase().includes(q))
     }
 
@@ -136,13 +153,45 @@ export default function Shop({ products: apiProducts }) {
 
               <div className="mt-6">
                 <div className="text-sm font-semibold">Search</div>
-                <input
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search products"
-                  className="mt-3 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm outline-none focus:border-blue-500/50"
-                />
+                <div className="relative">
+                  <input
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    autoFocus
+                    placeholder="Search products"
+                    className="mt-3 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm outline-none focus:border-blue-500/50"
+                  />
+
+                  {/* Quick suggestions: match first word exactly and show up to 3 */}
+                  {(() => {
+                    const firstWord = q.split(' ')[0]
+                    if (!firstWord) return null
+                    const suggestion = (apiProducts || [])
+                      .map(mapApiProductToAppProduct)
+                      .filter((p) => (p.name || '').split(' ')[0]?.toLowerCase() === firstWord)
+                      .slice(0, 3)
+
+                    if (!suggestion.length) return null
+
+                    return (
+                      <div className="absolute left-0 right-0 mt-2 rounded-xl border border-slate-200 bg-white shadow-2xl overflow-hidden z-20">
+                        {suggestion.map((p) => (
+                          <button
+                            key={p.id ?? p.name}
+                            type="button"
+                            onClick={() => setQuery(p.name.split(' ')[0])}
+                            className="w-full flex items-center justify-between gap-3 px-4 py-3 text-left text-sm hover:bg-slate-50"
+                          >
+                            <span className="truncate">{p.name}</span>
+                            <span className="shrink-0 text-slate-700 font-semibold">{p.price}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )
+                  })()}
+                </div>
               </div>
+
 
               <div className="mt-6">
                 <div className="text-sm font-semibold">Sort</div>

@@ -1,4 +1,5 @@
-import { useContext, useMemo, useState } from 'react'
+import { useContext, useEffect, useMemo, useState } from 'react'
+
 import { CartContext } from '../store/store'
 import { createOrder } from '../utils/localStorageDb'
 
@@ -40,9 +41,17 @@ export default function Checkout() {
 
   const total = (subtotal || 0) + tax
 
+
   const canCheckout = items.length > 0
 
+  // If the cart changes (e.g., user orders again), re-enable the form.
+  // This prevents the "Place order" button staying disabled after a previous success.
+  useEffect(() => {
+    if (!canCheckout) setSuccess(null)
+  }, [canCheckout])
+
   const onSubmit = (e) => {
+
     e.preventDefault()
     setError('')
 
@@ -56,16 +65,21 @@ export default function Checkout() {
     if (!customer.address.trim()) return setError('Address is required.')
     if (!customer.city.trim()) return setError('City is required.')
 
-    const order = createOrder({
-      customer,
-      items: items.map((i) => ({ name: i.name, qty: i.qty, unitPrice: i.priceNumber })),
-      subtotal: subtotal || 0,
-      tax,
-      total,
-    })
+    try {
+      const order = createOrder({
+        customer,
+        items: items.map((i) => ({ name: i.name, qty: i.qty, unitPrice: i.priceNumber })),
+        subtotal: subtotal || 0,
+        tax,
+        total,
+      })
 
-    dispatch?.({ type: 'CLEAR' })
-    setSuccess(order)
+      dispatch?.({ type: 'CLEAR' })
+      setSuccess(order)
+    } catch (e) {
+      console.error('Failed to place order:', e)
+      setError('Could not place order. Please try again.')
+    }
   }
 
   return (
